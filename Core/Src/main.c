@@ -49,7 +49,8 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
-
+struct udp_pcb* upcb = NULL;
+char data[7] = "Hello!";
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,8 +67,16 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN 0 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-  // отправляем пакет раз в секунду
-	udp_send_msg();
+    // отправляем пакет раз в секунду
+	udp_send_msg(upcb, data);
+}
+
+void udp_receive_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p,
+	    const ip_addr_t *addr, u16_t port)
+{
+	HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+	// в этой функции обязательно должны очистить p, иначе память потечёт
+	pbuf_free(p);
 }
 /* USER CODE END 0 */
 
@@ -104,8 +113,13 @@ int main(void)
   MX_TIM2_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
-  udp_create_socket();
+
+  ip4_addr_t ip4_addr;
+  IP4_ADDR(&ip4_addr, 192, 168, 0, 11);
+  upcb = udp_create_socket(ip4_addr, 3333, udp_receive_callback, NULL);
+
   HAL_TIM_Base_Start_IT(&htim2);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
