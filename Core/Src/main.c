@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "lwip.h"
+#include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -71,7 +72,27 @@ static void MX_TIM2_Init(void);
 static void udp_receive_callback (void *arg, struct udp_pcb *pcb, struct pbuf *p,
 	    const ip_addr_t *addr, u16_t port)
 {
-	HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+	char str2[7] = "LED1On", str3[8] = "LED1Off", str4[7] = "LED2On", str5[8] = "LED2Off", str6[7] = "LED3On", str7[8] = "LED3Off";
+
+	char str1[p->len];
+	strncpy(str1,p->payload,p->len);
+
+    if (strcmp (str1, str2)==0)    	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+    if (strcmp (str1, str3)==0)    	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
+
+    if (strcmp (str1, str4)==0)    	HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
+    if (strcmp (str1, str5)==0)    	HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_RESET);
+
+    if (strcmp (str1, str6)==0)    	HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_SET);
+    if (strcmp (str1, str7)==0)    	HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_RESET);
+
+    //для теста работы:
+	if (str1[0] == '1')
+	{
+		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+	}
+
+	//HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
 	// в этой функции обязательно должны очистить p, иначе память потечёт
 	pbuf_free(p);
 }
@@ -84,7 +105,7 @@ static void udp_receive_callback (void *arg, struct udp_pcb *pcb, struct pbuf *p
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
   // отправляем пакет раз в секунду
-	udp_send_msg(upcb, data);
+//	udp_send_msg(upcb, data);
 	//udp_send_msg_atalon();
 }
 /* USER CODE END 0 */
@@ -142,10 +163,10 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
 	  MX_LWIP_Process();
 
-	  //udp_send_msg();
-
+	  //так же для проверки, что прога залилась на плату
 	  if(HAL_GPIO_ReadPin (GPIOC, GPIO_PIN_13))
 	  {
 		  HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
