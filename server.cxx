@@ -40,15 +40,18 @@ main(int nargs, const char* args[nargs]) {
   std::array<char, 64u> buffer{};
   const std::string_view greeting{"Hello, boy!"};
 
+  auto receive_buf{asio::buffer(buffer)};
+  auto send_buf{asio::buffer(greeting)};
+
   while (0 < ntrans--) {
     try {
-      socket.receive_from(asio::buffer(buffer), endpoint);
+      socket.receive_from(receive_buf, endpoint);
 
     } catch (const system::system_error& error) {
       std::cerr << error.what() << std::endl;
     }
 
     std::cout << buffer << std::endl;
-    socket.send_to(asio::buffer(greeting), endpoint);
+    socket.send_to(send_buf, endpoint);
   }
 }
