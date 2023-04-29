@@ -66,8 +66,7 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN 0 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-  // отправляем пакет раз в секунду
-	udp_send_msg();
+	report();
 }
 /* USER CODE END 0 */
 
@@ -104,7 +103,6 @@ int main(void)
   MX_TIM2_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
-  udp_create_socket();
   HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 

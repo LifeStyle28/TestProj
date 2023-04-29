@@ -4,7 +4,6 @@
 #include "ip4_addr.h"
 #include "err.h"
 
-err_t udp_create_socket(); ///< функция создания сокета
-err_t udp_send_msg(); ///< функция отправки сообщения
+void report(void);
 
 #endif
