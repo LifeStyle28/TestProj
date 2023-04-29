@@ -81,6 +81,7 @@ struct udp_pcb* udp_create_s(struct udp_pcb* upcb, const ip4_addr_t ip_addr, con
 	if (upcb == NULL)
 		{
 		upcb = udp_new();
+		upcb->local_port = 3333;
 		}
 
 	udp_connect(upcb, &ip_addr, port);
