@@ -19,10 +19,16 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "lwip.h"
+#include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "udp_handler.h"
+
+//#include "udp_handler.h"
+
+
+#include "ip4_addr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +55,9 @@ UART_HandleTypeDef huart3;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
+static struct udp_pcb* upcb = NULL;
+
+char data[14] = "Hello Chugaev";
 
 /* USER CODE END PV */
 
@@ -60,6 +69,35 @@ static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
+static void udp_receive_callback (void *arg, struct udp_pcb *pcb, struct pbuf *p,
+	    const ip_addr_t *addr, u16_t port)
+{
+	char str2[7] = "LED1On", str3[8] = "LED1Off", str4[7] = "LED2On", str5[8] = "LED2Off", str6[7] = "LED3On", str7[8] = "LED3Off";
+
+	char str1[p->len];
+	strncpy(str1,p->payload,p->len);
+
+    if (strcmp (str1, str2)==0)    	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+    if (strcmp (str1, str3)==0)    	HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_RESET);
+
+    if (strcmp (str1, str4)==0)    	HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_SET);
+    if (strcmp (str1, str5)==0)    	HAL_GPIO_WritePin(GPIOB, LD2_Pin, GPIO_PIN_RESET);
+
+    if (strcmp (str1, str6)==0)    	HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_SET);
+    if (strcmp (str1, str7)==0)    	HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_RESET);
+
+    //для теста работы:
+	if (str1[0] == '1')
+	{
+		HAL_GPIO_WritePin(GPIOB, LD1_Pin, GPIO_PIN_SET);
+	}
+
+	//HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+	// в этой функции обязательно должны очистить p, иначе память потечёт
+	pbuf_free(p);
+}
+
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -67,7 +105,8 @@ static void MX_TIM2_Init(void);
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
   // отправляем пакет раз в секунду
-	udp_send_msg();
+//	udp_send_msg(upcb, data);
+	//udp_send_msg_atalon();
 }
 /* USER CODE END 0 */
 
@@ -104,7 +143,16 @@ int main(void)
   MX_TIM2_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
-  udp_create_socket();
+
+  //udp_create_socket_atalon();
+
+  ip4_addr_t ip_addr;
+  IP4_ADDR(&ip_addr, 192, 168, 0, 11);
+  u16_t local_port = 3333;
+  void *recv_arg = NULL;
+
+  upcb = udp_create_s(upcb, ip_addr, local_port, udp_receive_callback, recv_arg);
+
   HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
@@ -115,7 +163,16 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
 	  MX_LWIP_Process();
+
+	  //так же для проверки, что прога залилась на плату
+	  if(HAL_GPIO_ReadPin (GPIOC, GPIO_PIN_13))
+	  {
+		  HAL_GPIO_TogglePin(GPIOB, LD2_Pin);
+	  }
+
+
   }
   /* USER CODE END 3 */
 }
