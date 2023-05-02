@@ -64,10 +64,51 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//сокет
+static struct udp_pcb* upcb = NULL;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
   // отправляем пакет раз в секунду
-	udp_send_msg();
+	udp_send_msg(upcb, "Test string");
+}
+
+static void udp_receive_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p,
+	    const ip_addr_t *addr, u16_t port)
+{
+	// в этой функции обязательно должны очистить p, иначе память потечёт
+	u16_t len = p->len;
+	uint8_t* data = p->payload;
+	HAL_UART_Transmit(&huart3, data, len, 1000);
+
+	switch (data[0] - '0') {
+	case OFF:
+		HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
+		break;
+	case ON:
+		HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+		break;
+	}
+
+	switch (data[1] - '0') {
+	case OFF:
+		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+		break;
+	case ON:
+		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		break;
+	}
+
+	switch (data[2] - '0') {
+	case OFF:
+		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+		break;
+	case ON:
+		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+		break;
+	}
+
+	pbuf_free(p);
+	//HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
 }
 /* USER CODE END 0 */
 
@@ -104,7 +145,12 @@ int main(void)
   MX_TIM2_Init();
   MX_LWIP_Init();
   /* USER CODE BEGIN 2 */
-  udp_create_socket();
+
+
+  ip4_addr_t dest;
+  IP4_ADDR(&dest, 192, 168, 0, 11);
+  upcb = udp_create_socket(dest, 3333, udp_receive_callback, NULL);
+
   HAL_TIM_Base_Start_IT(&htim2);
   /* USER CODE END 2 */
 
