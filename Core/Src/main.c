@@ -76,7 +76,37 @@ static void udp_receive_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 	    const ip_addr_t *addr, u16_t port)
 {
 	// в этой функции обязательно должны очистить p, иначе память потечёт
-  HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
+	u16_t len = p->len;
+	uint8_t* data = p->payload;
+	HAL_UART_Transmit(&huart3, data, len, 1000);
+
+	switch (data[0] - '0') {
+	case OFF:
+		HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_RESET);
+		break;
+	case ON:
+		HAL_GPIO_WritePin(LD1_GPIO_Port, LD1_Pin, GPIO_PIN_SET);
+		break;
+	}
+
+	switch (data[1] - '0') {
+	case OFF:
+		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+		break;
+	case ON:
+		HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+		break;
+	}
+
+	switch (data[2] - '0') {
+	case OFF:
+		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+		break;
+	case ON:
+		HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+		break;
+	}
+
 	pbuf_free(p);
 	//HAL_GPIO_TogglePin(LD1_GPIO_Port, LD1_Pin);
 }

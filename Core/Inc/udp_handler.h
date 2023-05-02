@@ -6,6 +6,12 @@
 #include "udp.h"
 #include <string.h> // For strlen()
 
+enum Leds_states {
+  OFF,
+  ON,
+  HIGH_Z
+};
+
 struct udp_pcb* udp_create_socket(const ip4_addr_t ip_addr, const u16_t port,
 									udp_recv_fn recv, void *recv_arg);		 ///< функция создания сокета
 err_t udp_send_msg(struct udp_pcb* upcb, const char* data); ///< функция отправки сообщения
