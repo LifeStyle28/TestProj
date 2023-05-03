@@ -74,13 +74,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 
 char ver01[3] = "01";
 char str_ld[3] = "LD";
-//uint16_t ld_num[4];
-//ld_num[1] = LD1_Pin;
-//ld_num[2] = LD2_Pin;
-//ld_num[3] = LD3_Pin;
-//uint32_t ld_commands[2];
-//ld_commands[0] = GPIO_PIN_RESET;
-//ld_commands[1] = GPIO_PIN_SET;
 char ld1off[3] = "10";
 char ld1on[3] = "11";
 char ld2off[3] = "20";
@@ -125,11 +118,6 @@ void udp_receive_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 
 			else if (strcmp(command, ld3off) == 0) HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_RESET);
 			else if (strcmp(command, ld3on) == 0) HAL_GPIO_WritePin(GPIOB, LD3_Pin, GPIO_PIN_SET);
-
-			//HAL_GPIO_WritePin(
-			//		GPIOB,
-			//		ld_num[package[i + 2] - '0'],
-			//		ld_commands[package[i + 3] - '0']);
 		}
 		if (err == 0)
 		{
