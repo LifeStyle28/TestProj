@@ -13,8 +13,8 @@ struct udp_pcb* udp_create_socket(const ip4_addr_t ip_addr, const u16_t port, ud
 		return NULL;
 	}
 
-	// коннектимся к удаленному серверу по ИП и порту
-	if (ERR_OK != udp_connect(upcb, &ip_addr, port))
+	// привязка к локальному ИП и порту
+	if (ERR_OK != udp_bind(upcb, &ip_addr, port))
 	{
 		udp_remove(upcb);
 		return NULL;
@@ -25,7 +25,7 @@ struct udp_pcb* udp_create_socket(const ip4_addr_t ip_addr, const u16_t port, ud
 	return upcb;
 }
 
-err_t udp_send_msg(struct udp_pcb* upcb, const char* data)
+err_t udp_send_msg_to(struct udp_pcb* upcb, const char* data, const ip_addr_t *dst_ip, u16_t dst_port)
 {
 	// если сокет не создан, то на выход с ошибкой
 	if (upcb == NULL)
@@ -50,7 +50,7 @@ err_t udp_send_msg(struct udp_pcb* upcb, const char* data)
 		err_result = err;
 	} else {
 		// отсылаем пакет
-		err_result = udp_send(upcb, p);
+		err_result = udp_sendto(upcb, p, dst_ip, dst_port);
 	}
 	// очищаем аллоцированную память
 	pbuf_free(p);
